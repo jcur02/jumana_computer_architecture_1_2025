@@ -8,7 +8,7 @@ from tkinter import filedialog, Tk
 # from bilinear_interpolation import *
 
 
-class Interface:
+class UI:
 
     divs = range(0, 390, 97)[1:-1]
     quadrants = []
@@ -155,4 +155,4 @@ class Interface:
 
         self.ax3.imshow(InterpolatedImage, cmap=plt.get_cmap('gray'))
 
-interface = Interface()
+interface = UI()
