@@ -116,7 +116,7 @@ class UI:
     def load_image(self, event):
         Tk().withdraw()
         self.path = filedialog.askopenfilename(
-            initialdir=os.path.join(os.getcwd(), 'imgs'),
+            initialdir=os.path.join(os.getcwd(), 'Images'),
             title="Select image",
             filetypes=(("Image files", "*.jpg *.jpeg *.png"),
                         ("All files", "*.*")))
