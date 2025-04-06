@@ -69,17 +69,17 @@
 ; decimal to ascii conversion
 %macro dec2ascii 0
     mov rcx, 10                     
-    mov r10, 2
+    mov r8, 2
     mov rsi, numRes         
 
  %%d2a:
     xor rdx, rdx                    
     div rcx                         
     add dl, '0'                     
-    lea rbx, [rsi+r10]                  
+    lea rbx, [rsi+r8]                  
     mov [rbx], dl                   
-    mov r12,rdx
-    sub r10, 1
+    mov r11,rdx
+    sub r8, 1
     test rax, rax                   
     jnz %%d2a                    
     mov rax, numRes         
