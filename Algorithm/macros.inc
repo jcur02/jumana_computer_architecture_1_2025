@@ -104,17 +104,17 @@
 %macro linear_interpolation 2
     xor  rax, rax           
     xor  rcx, rcx           
-    mov  al, %1             
+    mov  al, %1 ; store x            
     mov  dl, 2              
-    mul  dl                 
+    mul  dl     ; weight x * 2            
     mov  dl, 3              
-    div  dl                 
+    div  dl ; divide by 3 so (x * 2) / 3             
     mov cl, al              
 
     xor  rax, rax           
-    mov  al, %2             
+    mov  al, %2 ; store y             
     mov  dl, 3              
-    div  dl                 
-    add  cl, al             
+    div  dl ; divide by 3 so y / 3                 
+    add  cl, al ; add to get interpolated value ((x * 2) + y) / 3             
     xor  rax, rax           
 %endmacro

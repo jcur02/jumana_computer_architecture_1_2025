@@ -78,63 +78,63 @@ _newLine:
 
 ; coordinate bilinear interpolation 
 _bilinear_interpolation:
-    call _vertical
-    call _horizontal
+    call _vertical ; First do vertical pixels, doing intermediate pixels also in the process
+    call _horizontal ; then horizontal pixels
     ret
 
 ; calculate vertical pixels
 _vertical:
     clear_registers
     xor r13, 0                  
-    mov [index], r13            
-    jmp _vertical_columns
+    mov [index], r13 ; store index value        
+    jmp _intermediate_columns 
 _vertical_end:
     ret
 
-; Vertical pixels in columns
-_vertical_columns:
+; Vertical and intermediate pixels in columns
+_intermediate_columns:
     cmp r13, px             
-    jge _vertical_end    
+    jge _vertical_end ; finished 
     push r13
     mov r12, 0                  
     add r12, r13                
-    jmp _vertical_rows
-_vertical_columns_aux:
+    jmp _intermediate_rows  ; start interpolating on the row
+_intermediate_columns_aux:
     pop r13
     add r13, 3                  
-    jmp _vertical_columns
+    jmp _intermediate_columns ; move to next column
 
-; vertical pixels in rows
-_vertical_rows:
+; vertical and intermediate pixels in rows
+_intermediate_rows:
     cmp r12, fixedLen             
-    jge _vertical_columns_aux        ;
+    jge _intermediate_columns_aux ; finished interpolating row
     push r12
-    call _calculate_vertical
+    call _calculate_vertical    ; get vertical values then get intermediate value
     pop r12
     add r12, px3    
-    jmp _vertical_rows
+    jmp _intermediate_rows  ; next row
 
-; calculates vertical pixels values
+; calculates vertical and intermediate pixels values
 _calculate_vertical:
     clear_registers
-    mov bl, byte[res+r12]     
+    mov bl, byte[res+r12]   ; get near value x     
     mov rax, r12                
     add rax, px3    
-    mov bh, byte[res+rax]     
+    mov bh, byte[res+rax]   ; get near value y
     mov rax, r12                
     add rax, px             
-    mov [interpolationIndex1], rax    
+    mov [interpolationIndex1], rax ; index where calculated value goes   
     mov rax, r12                
     add rax, px2    
-    mov [interpolationIndex2], rax  
-    linear_interpolation bl, bh
-    mov al, cl
+    mov [interpolationIndex2], rax ; index where second calculated value goes  
+    linear_interpolation bl, bh ; interpolate x and y
+    mov al, cl ; store result
     push rbx
-    concatenate res, interpolationIndex1      
+    concatenate res, interpolationIndex1 ; put result on the pixels array   
     pop rbx
-    linear_interpolation bh, bl
+    linear_interpolation bh, bl ; same as before but now interpolating y and x
     mov al, cl
-    concatenate res, interpolationIndex2      ; store value
+    concatenate res, interpolationIndex2 ; put result on the pixels array
     ret
 
 ; calculate horizontal pixels
@@ -142,51 +142,51 @@ _horizontal:
     clear_registers
     mov r13, 0                      
     mov r12, 0
-    jmp _horizontal_columns
+    jmp _horizontal_aux ; start getting horizontal pixels
 _horizontal_end:
     ret
 
-; Horizontal pixels in columns
-_horizontal_columns:
-    cmp r13, len-3
-    jge _horizontal_end      
+; Horizontal pixels
+_horizontal_aux:
+    cmp r13, len-3 
+    jge _horizontal_end ; finished       
     push r13
-    call _calculate_horizontal
+    call _calculate_horizontal    ; get horizontal values
     pop r13
     add r13, 3                      
     test r13, r13                   
-    jz _horizontal_columns
+    jz _horizontal_aux ; base case
     xor rdx, rdx
     mov rax, r13
     add ax, 1
     mov ebx, px
     div ebx
     test edx, edx                    
-    jnz _horizontal_columns          
-    add  r13, 1                     
-    jmp _horizontal_columns
+    jnz _horizontal_aux ; finished set of horizontal values?          
+    add  r13, 1                       
+    jmp _horizontal_aux ; move onto the next set of horizontal values
 
 ; calculates horizontal pixels values
 _calculate_horizontal:
     clear_registers
-    mov bl, byte[res+r13]     
+    mov bl, byte[res+r13] ; get near value x     
     mov rax, r13                
     add rax, 3                  
-    mov bh, byte[res+rax]     
+    mov bh, byte[res+rax] ; get near value y     
     mov rax, r13                
     add rax, 1                  
-    mov [interpolationIndex1], rax    
+    mov [interpolationIndex1], rax ; index where calculated value goes    
     mov rax, r13                
     add rax, 2                  
-    mov [interpolationIndex2], rax  
-    linear_interpolation bl, bh
+    mov [interpolationIndex2], rax ; index where second calculated value goes 
+    linear_interpolation bl, bh ; interpolate x and y
     mov al, cl
     push rbx
-    concatenate res, interpolationIndex1      
+    concatenate res, interpolationIndex1 ; put result on the pixels array       
     pop rbx
-    linear_interpolation bh, bl
+    linear_interpolation bh, bl ; interpolate y and x
     mov al, cl
-    concatenate res, interpolationIndex2      
+    concatenate res, interpolationIndex2 ; put result on the pixels array       
     ret
 
 ; Write file
